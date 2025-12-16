@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import mammoth from "mammoth";
 
 interface FileUploadProps {
   onTextExtracted: (text: string) => void;
@@ -43,10 +44,9 @@ export function FileUpload({ onTextExtracted }: FileUploadProps) {
         return;
       }
 
-      // For other formats, try to extract text
+      // For .rtf files, basic RTF to text conversion
       if (extension === ".rtf") {
         const text = await file.text();
-        // Basic RTF to text conversion (strips RTF formatting)
         const plainText = text
           .replace(/\\[a-z]+\d*\s?/gi, "")
           .replace(/[{}]/g, "")
@@ -60,29 +60,50 @@ export function FileUpload({ onTextExtracted }: FileUploadProps) {
         return;
       }
 
-      // For .doc/.docx, we'll extract what we can
+      // For .docx files, use mammoth for proper extraction
       if (extension === ".docx") {
         const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
+        const result = await mammoth.extractRawText({ arrayBuffer });
         
-        // DOCX files are ZIP archives - try to find document.xml
-        // This is a simplified extraction
-        const textDecoder = new TextDecoder("utf-8");
+        if (result.value) {
+          onTextExtracted(result.value);
+          toast({
+            title: "File loaded",
+            description: `Successfully extracted text from ${file.name}`,
+          });
+        } else {
+          throw new Error("No text content found in document");
+        }
+        return;
+      }
+
+      // For .doc files (legacy format), try basic text extraction
+      if (extension === ".doc") {
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const textDecoder = new TextDecoder("utf-8", { fatal: false });
         const content = textDecoder.decode(uint8Array);
         
-        // Extract text between XML tags
-        const textMatches = content.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
-        if (textMatches) {
-          const extractedText = textMatches
-            .map(match => match.replace(/<[^>]+>/g, ""))
-            .join(" ");
+        // Extract readable text by filtering non-printable characters
+        const extractedText = content
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        
+        if (extractedText.length > 50) {
           onTextExtracted(extractedText);
           toast({
             title: "File loaded",
-            description: `Extracted text from ${file.name}`,
+            description: `Extracted text from ${file.name} (legacy format - some formatting may be lost)`,
           });
-          return;
+        } else {
+          toast({
+            title: "Limited extraction",
+            description: "Could not fully extract text from .doc file. Consider converting to .docx",
+            variant: "destructive",
+          });
         }
+        return;
       }
 
       // Fallback: try reading as text
@@ -93,10 +114,9 @@ export function FileUpload({ onTextExtracted }: FileUploadProps) {
         description: `Loaded ${file.name}`,
       });
     } catch (error) {
-      console.error("Error reading file:", error);
       toast({
         title: "Error reading file",
-        description: "Could not extract text from this file. Try pasting the text directly.",
+        description: "Could not extract text from this file. Try pasting the text directly or converting to .docx format.",
         variant: "destructive",
       });
     }

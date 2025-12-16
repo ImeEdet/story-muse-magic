@@ -1,9 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const MAX_STORY_LENGTH = 50000;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,6 +14,29 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authentication" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { storyText, vibes } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
@@ -20,6 +46,14 @@ serve(async (req) => {
 
     if (!storyText || storyText.trim().length === 0) {
       throw new Error("Story text is required");
+    }
+
+    // Input size validation
+    if (storyText.length > MAX_STORY_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Story text must be less than ${MAX_STORY_LENGTH} characters` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const vibeString = vibes && vibes.length > 0 
@@ -46,8 +80,6 @@ Guidelines:
 
 Make each suggestion specific, evocative, and aligned with the story's existing tone and the selected vibes.`;
 
-    console.log("Calling Lovable AI Gateway...");
-    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -65,7 +97,6 @@ Make each suggestion specific, evocative, and aligned with the story's existing 
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(
@@ -89,8 +120,6 @@ Make each suggestion specific, evocative, and aligned with the story's existing 
       throw new Error("No response from AI");
     }
 
-    console.log("AI Response received, parsing...");
-
     // Extract JSON from the response (handle markdown code blocks)
     let jsonStr = content;
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -104,9 +133,8 @@ Make each suggestion specific, evocative, and aligned with the story's existing 
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in analyze-story function:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "An error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
