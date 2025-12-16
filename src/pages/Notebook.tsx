@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Copy, Trash2, Check, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Select,
   SelectContent,
@@ -33,10 +35,20 @@ export default function Notebook() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const { toast } = useToast();
+  const { user, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchIdeas();
-  }, []);
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchIdeas();
+    }
+  }, [user]);
 
   const fetchIdeas = async () => {
     try {
