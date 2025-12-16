@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Suggestions {
@@ -26,6 +27,7 @@ export default function Index() {
   const [regeneratingCategory, setRegeneratingCategory] = useState<string | null>(null);
   const [vibesOpen, setVibesOpen] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const analyzeStory = async () => {
     if (!storyText.trim()) {
@@ -84,14 +86,29 @@ export default function Index() {
   };
 
   const saveIdea = async (content: string, category: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save ideas to your notebook.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.from("saved_ideas").insert({
         content,
         category,
         tags: selectedVibes,
+        user_id: user.id,
       });
 
       if (error) throw error;
+      
+      toast({
+        title: "Saved!",
+        description: "Idea added to your notebook.",
+      });
     } catch (error) {
       console.error("Error saving idea:", error);
       toast({
