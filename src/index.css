@@ -104,6 +104,7 @@
   }
 }
 
+/* Ambient Background Animations */
 @layer base {
   * {
     @apply border-border;
@@ -112,11 +113,128 @@
   body {
     @apply bg-background text-foreground font-serif;
     font-family: 'Libre Baskerville', Georgia, serif;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Light Mode - Floating Autumn Leaves */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: 
+      radial-gradient(ellipse 80px 40px at 20% 30%, hsl(35 40% 70% / 0.15), transparent),
+      radial-gradient(ellipse 60px 30px at 70% 20%, hsl(25 50% 60% / 0.12), transparent),
+      radial-gradient(ellipse 90px 45px at 40% 70%, hsl(30 45% 65% / 0.1), transparent),
+      radial-gradient(ellipse 50px 25px at 85% 60%, hsl(20 55% 55% / 0.12), transparent),
+      radial-gradient(ellipse 70px 35px at 15% 80%, hsl(38 35% 68% / 0.08), transparent);
+    animation: autumn-drift 25s ease-in-out infinite;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: 
+      radial-gradient(ellipse 100px 50px at 60% 40%, hsl(32 30% 75% / 0.1), transparent),
+      radial-gradient(ellipse 120px 60px at 30% 60%, hsl(28 40% 60% / 0.08), transparent);
+    animation: autumn-drift-reverse 30s ease-in-out infinite;
+  }
+
+  /* Dark Mode - Haunting Sea Fog/Waves */
+  .dark body::before {
+    background: 
+      radial-gradient(ellipse 200px 100px at 20% 30%, hsl(160 30% 25% / 0.2), transparent),
+      radial-gradient(ellipse 300px 150px at 80% 70%, hsl(165 35% 20% / 0.15), transparent),
+      radial-gradient(ellipse 250px 125px at 50% 50%, hsl(158 25% 22% / 0.12), transparent),
+      radial-gradient(ellipse 180px 90px at 10% 80%, hsl(162 30% 18% / 0.18), transparent);
+    animation: sea-fog 20s ease-in-out infinite;
+  }
+
+  .dark body::after {
+    background: 
+      radial-gradient(ellipse 400px 200px at 70% 30%, hsl(160 40% 15% / 0.15), transparent),
+      radial-gradient(ellipse 350px 175px at 25% 65%, hsl(165 30% 18% / 0.12), transparent);
+    animation: wave-motion 15s ease-in-out infinite;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Cormorant Garamond', Georgia, serif;
     @apply font-semibold tracking-wide;
+  }
+}
+
+@keyframes autumn-drift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(15px, 10px) rotate(1deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-10px, 20px) rotate(-1deg);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(20px, -5px) rotate(0.5deg);
+    opacity: 0.7;
+  }
+}
+
+@keyframes autumn-drift-reverse {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(-20px, 15px) rotate(-1deg);
+    opacity: 0.7;
+  }
+  66% {
+    transform: translate(10px, -10px) rotate(1deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes sea-fog {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translate(-30px, 20px) scale(1.05);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(20px, -15px) scale(0.98);
+    opacity: 0.9;
+  }
+  75% {
+    transform: translate(-15px, -10px) scale(1.02);
+    opacity: 0.7;
+  }
+}
+
+@keyframes wave-motion {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) translateX(30px);
+    opacity: 0.8;
   }
 }
 

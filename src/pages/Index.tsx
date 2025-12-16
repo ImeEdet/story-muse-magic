@@ -107,26 +107,26 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-6xl relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-foreground mb-3 sm:mb-4">
             Ignite Your Story
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Paste your writing and let AI spark new ideas—plot twists, character names,
             settings, and titles that match your story's unique vibe.
           </p>
         </div>
 
         {/* Input Section */}
-        <div className="space-y-6 mb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Text Input */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Your Story Text</label>
                 <span className="text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ export default function Index() {
                 value={storyText}
                 onChange={(e) => setStoryText(e.target.value)}
                 placeholder="Paste your story excerpt here... The more context you provide, the better the suggestions will be."
-                className="min-h-[250px] resize-y font-serif text-base leading-relaxed"
+                className="min-h-[200px] sm:min-h-[250px] resize-y font-serif text-sm sm:text-base leading-relaxed"
               />
               <FileUpload onTextExtracted={setStoryText} />
             </div>
@@ -146,7 +146,7 @@ export default function Index() {
             <div className="lg:col-span-1">
               <Collapsible open={vibesOpen} onOpenChange={setVibesOpen}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-between mb-4">
+                  <Button variant="ghost" className="w-full justify-between mb-3 sm:mb-4">
                     <span className="font-display font-semibold">Story Vibes</span>
                     {vibesOpen ? (
                       <ChevronUp className="h-4 w-4" />
@@ -156,7 +156,7 @@ export default function Index() {
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
+                  <div className="max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-2 space-y-4">
                     <VibeSelector
                       selectedVibes={selectedVibes}
                       onVibesChange={setSelectedVibes}
@@ -171,14 +171,14 @@ export default function Index() {
           <SelectedVibesTags vibes={selectedVibes} onRemove={removeVibe} />
 
           {/* Get Ideas Button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-2">
             <Button
               onClick={analyzeStory}
               disabled={isLoading || !storyText.trim()}
               size="lg"
-              className="px-8 py-6 text-lg font-display font-semibold gap-2"
+              className="px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-display font-semibold gap-2"
             >
-              <Sparkles className="h-5 w-5" />
+              <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
               {isLoading ? "Analyzing..." : "Get Ideas"}
             </Button>
           </div>
