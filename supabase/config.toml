@@ -2,3 +2,6 @@ project_id = "canjyzauwcwsvrqwrnnu"
 
 [functions.analyze-story]
 verify_jwt = true
+
+[functions.story-muse]
+verify_jwt = false

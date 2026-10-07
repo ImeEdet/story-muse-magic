@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import Studio from "./pages/Studio";
 import Notebook from "./pages/Notebook";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -21,7 +22,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Studio />} />
+              <Route path="/classic" element={<Index />} />
               <Route path="/notebook" element={<Notebook />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<NotFound />} />
