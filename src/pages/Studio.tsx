@@ -28,7 +28,7 @@ const quickActions = [
 const shortLabel = (v: string) => v.split(" (")[0];
 
 export default function Studio() {
-  const { user, session } = useAuth() as ReturnType<typeof useAuth> & { session?: { access_token: string } };
+  const { user } = useAuth();
   const { toast } = useToast();
   const [draft, setDraft] = useState(() => localStorage.getItem(DRAFT_KEY) ?? "");
   const [detected, setDetected] = useState<string[]>([]);
